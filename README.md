@@ -4,20 +4,20 @@ SpriteBuilder runtime for cocos2dx-lua(v3quick)
 
  Why this project.
 -------------------
-> 1. There's no SpriteBuilde runtime for cocos2dx-lua(v3quick).
-> 2. Lua is fast enough to handle UI and simple animations.
-> 3. (Quick-UI)(the Lua implemention of UI frameworks in v3quick) is as good as the C++ implemention in cocos2dx(c++). 
+  * There's no SpriteBuilde runtime for cocos2dx-lua(v3quick).
+  * Lua is fast enough to handle UI and simple animations.
+  * (Quick-UI)(the Lua implemention of UI frameworks in v3quick) is as good as the C++ implemention in cocos2dx(c++). 
 
  About this implemention.
 -------------------
-> 1. Expande the the Quick-UI if needed.
-> 2. Convert *.ccb file to json, for json is easier to read than xml in Lua. 
+ * Expande the Quick-UI or add SpriteBuilder plugin if needed.
+ * Convert *.ccb file to json, for json is easier to read than xml in Lua. 
 In this project, I'll just use a cmdline tool called __plutil__.
-> 3. __Not__ All feature will be implemented in the first version.
+ * __Not__ All feature will be implemented in the first version.
 
 About the example.
 ------------------
-> 1. The example is based on v3quick-3.3 version.
+ * The example is based on v3quick-3.3 version.
 
 
 
