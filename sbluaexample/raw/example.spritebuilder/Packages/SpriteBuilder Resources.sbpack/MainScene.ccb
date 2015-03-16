@@ -194,7 +194,7 @@
 						<key>value</key>
 						<array>
 							<real>0.5</real>
-							<real>0.5</real>
+							<real>0.83437502384185791</real>
 							<integer>0</integer>
 							<integer>2</integer>
 							<integer>2</integer>
@@ -231,8 +231,8 @@
 						<string>Text</string>
 						<key>value</key>
 						<array>
-							<string>SpriteBuilder</string>
-							<false/>
+							<string>game_title</string>
+							<true/>
 						</array>
 					</dict>
 					<dict>
@@ -367,6 +367,8 @@
 						</array>
 					</dict>
 				</array>
+				<key>selected</key>
+				<true/>
 				<key>seqExpanded</key>
 				<true/>
 			</dict>

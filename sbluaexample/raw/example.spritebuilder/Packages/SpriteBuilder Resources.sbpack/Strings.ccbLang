@@ -5,12 +5,33 @@
 	<key>activeLanguages</key>
 	<array>
 		<string>en</string>
+		<string>zh-Hans</string>
 	</array>
 	<key>fileType</key>
 	<string>SpriteBuilderTranslations</string>
 	<key>fileVersion</key>
 	<integer>1</integer>
 	<key>translations</key>
-	<array/>
+	<array>
+		<dict>
+			<key>comment</key>
+			<string>Test</string>
+			<key>key</key>
+			<string>game_title</string>
+			<key>translations</key>
+			<dict>
+				<key>en</key>
+				<string>Test</string>
+				<key>zh-Hans</key>
+				<string>测试</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>key</key>
+			<string></string>
+			<key>translations</key>
+			<dict/>
+		</dict>
+	</array>
 </dict>
 </plist>
