@@ -1,8 +1,6 @@
 platform=$1
 filename=$2
 dest_dir=$3/${filename}
-mkdir -p ${dest_dir}/res_android
-mkdir -p ${dest_dir}/res_ios
 
 if [ "$platform" = "android" ]; then
 	echo buiding Resources Android start
