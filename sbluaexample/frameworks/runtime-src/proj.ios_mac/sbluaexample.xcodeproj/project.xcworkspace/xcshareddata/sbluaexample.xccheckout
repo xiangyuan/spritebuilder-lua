@@ -5,11 +5,13 @@
 	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
 	<false/>
 	<key>IDESourceControlProjectIdentifier</key>
-	<string>8669570A-6104-4F80-9FF7-AD727ADA8FCE</string>
+	<string>76802AA1-726F-4336-886F-62ADD73EDFC6</string>
 	<key>IDESourceControlProjectName</key>
 	<string>sbluaexample</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
+		<key>852ED3691A47A99B0D19C820A500AE9772B2A44E</key>
+		<string>https://github.com/dualface/v3quick</string>
 		<key>D242390A062FFEA7AA3052C30B4D313F86D98B04</key>
 		<string>https://github.com/tangyiyang/spritebuilder-lua</string>
 	</dict>
@@ -17,6 +19,8 @@
 	<string>sbluaexample/frameworks/runtime-src/proj.ios_mac/sbluaexample.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
+		<key>852ED3691A47A99B0D19C820A500AE9772B2A44E</key>
+		<string>../../../../../../../v3quick</string>
 		<key>D242390A062FFEA7AA3052C30B4D313F86D98B04</key>
 		<string>../../../../../..</string>
 	</dict>
@@ -35,6 +39,14 @@
 			<string>D242390A062FFEA7AA3052C30B4D313F86D98B04</string>
 			<key>IDESourceControlWCCName</key>
 			<string>spritebuilder-lua</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>852ED3691A47A99B0D19C820A500AE9772B2A44E</string>
+			<key>IDESourceControlWCCName</key>
+			<string>v3quick</string>
 		</dict>
 	</array>
 </dict>

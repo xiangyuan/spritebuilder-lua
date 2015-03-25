@@ -36,7 +36,6 @@ public:
     virtual void applicationWillEnterForeground();
     
     void setLaunchMode(int mode);
-    
 private:
     int _launchMode;
 };

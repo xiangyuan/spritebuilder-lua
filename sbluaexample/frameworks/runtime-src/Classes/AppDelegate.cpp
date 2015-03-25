@@ -54,7 +54,7 @@ static void quick_module_register(lua_State *L)
 
 //
 AppDelegate::AppDelegate()
-:_launchMode(1)
+:_launchMode(0)
 {
 }
 
@@ -122,7 +122,6 @@ bool AppDelegate::applicationDidFinishLaunching()
 
     // use Quick-Cocos2d-X
     quick_module_register(L);
-
     LuaStack* stack = engine->getLuaStack();
 #if ANYSDK_DEFINE > 0
     lua_getglobal(stack->getLuaState(), "_G");
@@ -131,7 +130,7 @@ bool AppDelegate::applicationDidFinishLaunching()
     lua_pop(stack->getLuaState(), 1);
 #endif
 
-    stack->setXXTEAKeyAndSign("2dxLua", strlen("2dxLua"), "XXTEA", strlen("XXTEA"));
+//    stack->setXXTEAKeyAndSign("2dxLua", strlen("2dxLua"), "XXTEA", strlen("XXTEA"));
 
     //register custom function
     //LuaStack* stack = engine->getLuaStack();
@@ -148,6 +147,7 @@ bool AppDelegate::applicationDidFinishLaunching()
         engine->executeScriptFile(ConfigParser::getInstance()->getEntryFile().c_str());
     }
 #else
+    FileUtils::getInstance()->addSearchPath("src/");
     engine->executeScriptFile(ConfigParser::getInstance()->getEntryFile().c_str());
 #endif
 
@@ -177,6 +177,7 @@ void AppDelegate::applicationWillEnterForeground()
 
     Director::getInstance()->getEventDispatcher()->dispatchCustomEvent("APP_ENTER_FOREGROUND_EVENT");
 }
+
 
 void AppDelegate::setLaunchMode(int mode)
 {

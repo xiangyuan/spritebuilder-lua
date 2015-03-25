@@ -15,15 +15,15 @@
 	<array>
 		<dict>
 			<key>comment</key>
-			<string>Test</string>
+			<string>Hello SpriteBuilder-Lua</string>
 			<key>key</key>
 			<string>game_title</string>
 			<key>translations</key>
 			<dict>
 				<key>en</key>
-				<string>Test</string>
+				<string>Hello SpriteBuilder-Lua</string>
 				<key>zh-Hans</key>
-				<string>测试</string>
+				<string>你好SpriteBuilder_Lua</string>
 			</dict>
 		</dict>
 		<dict>
