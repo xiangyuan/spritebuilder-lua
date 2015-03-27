@@ -3,6 +3,8 @@ local CCBLoader = class("CCBLoader")
 local POSITION_TYPE_IN_POINTS  = 0
 local POSITION_TYPE_IN_UI_POINTS = 1
 local POSITION_TYPE_PERCENT = 2
+local Config = require("spritebuilder-lua.CCBConfig")
+local translation = Config:getInstance():getTranslation()
 
 local function setNodeProps(node, options)
     if options.contentSize then
@@ -33,7 +35,6 @@ local function setNodeProps(node, options)
     if options.visible then
         visible = options.visible
     end
-    dump(options, "setNodeProps options")
     print(debug.traceback())
     node:setScaleX(scaleX)
     node:setScaleY(scaleY)
@@ -48,7 +49,6 @@ end
 
 local function setSpriteProps(spr, options)
     local cache = cc.SpriteFrameCache:getInstance()
-    dump(options, "options")
     if options.spriteFrame.plist ~= "" then
         local frame = cache:getSpriteFrame(options.spriteFrame.spriteFrameName)
         spr:setSpriteFrame(frame)
@@ -154,7 +154,6 @@ local function controllButtonCreateFunc(options)
 end
 
 local function labelTTFCreateFunc(options)
-    print("label ttf options is")
     local label = display.newTTFLabel({ 
                                         text = options.string,
                                         font = options.fontName, 
@@ -169,7 +168,9 @@ local function labelTTFCreateFunc(options)
 end
 
 local function labelBMFontCreateFunc(options)
-    local label = display.newBMFontLabel{font = options.fntFile, text = options.string}
+    local text = options.string[2] and translation:str(options.string[1]) or options.string[1]
+    local font_path = Config.fonts_root_path .. options.fntFile
+    local label = display.newBMFontLabel{font = font_path, text = text}
     setNodeProps(label, options)
     setLabelBMFontProps(label, options)
     return label
@@ -235,21 +236,17 @@ local baseClassCreateFuncs = {
 local function positionparseFunc(data, father)
 
     local x, y
-
     -- setx
-    dump(data, "positionparseFunc")
     if father and data[4] == POSITION_TYPE_PERCENT then 
         x = data[1] * father:getContentSize().width
     elseif (data[4] == POSITION_TYPE_IN_POINTS or data[4] == POSITION_TYPE_IN_UI_POINTS) then
         x = data[1]
     end
-    print("father = ", father)
      if father and data[5] == POSITION_TYPE_PERCENT then 
         y = data[2] * father:getContentSize().height
     elseif (data[5] == POSITION_TYPE_IN_POINTS or data[5] == POSITION_TYPE_IN_UI_POINTS) then
         y = data[2]
     end
-    print("x, y = ", x, y)
     return {x = x, y = y}
 
     -- sety
@@ -422,7 +419,7 @@ local function createNodeWithBaseClassName(rootdata, father, childrenList, seq)
     local node = baseClassCreateFuncs[baseClassName](options)
     dump(options)
     setNodeBaseValue(node, baseClassName, options)
-    -- 把animatedProprties存起来，方便后面创建Action的时候使用
+    -- used for create actions
     local animatedProperties = rootdata["animatedProperties"]
     if animatedProperties then
         print("-----animatedProperties----")
@@ -440,12 +437,14 @@ local function createNodeWithBaseClassName(rootdata, father, childrenList, seq)
             local child = children[i]
             local nextList = childrenList
             -- 如果该节点还有子节点，则再创建一个table 用来保存子节点的数据，递归到根节点
+            -- create new table to save to reference of the children
             if #child.children > 0 then
                 childrenList[child.memberVarAssignmentName] = {}
                 nextList = childrenList[child.memberVarAssignmentName]
             end
 
             -- 递归创建子节点
+            -- create the children recursively
             print("node.contentsize = ", node:getContentSize().width, node:getContentSize().height)
             local c = createNodeWithBaseClassName(child, node, nextList, seq)
             if c then
@@ -456,7 +455,8 @@ local function createNodeWithBaseClassName(rootdata, father, childrenList, seq)
                 assert(false)
             end
 
-            -- 这里遍历到根节点了，进行赋值
+            -- 这里遍历到叶节点了，进行赋值
+            -- to the 'leaf nodes'
             if child.memberVarAssignmentName
                 and child.memberVarAssignmentName ~= "" 
                 and #child.children == 0 then
@@ -469,6 +469,7 @@ end
 
 function CCBLoader.loadCCB(jsonFileName, callbacks, root)
     print("filepath is ", jsonFileName)
+    require("spritebuilder-lua.CCBConfig"):getInstance()
     local data = cc.HelperFunc:getFileData(jsonFileName)
     local layoutdata = json.decode(data)
     local rootdata = layoutdata["nodeGraph"]
@@ -492,7 +493,7 @@ function CCBLoader.playSeq(node, allseq, s)
     for i = 1, #sounds do
         node:runAction(sounds[i])
     end
-    -- 处理循环播放或者连续播放的情况
+    -- play recursively
     local function playNextSeq(runningNode, allseq, seq)
         local nextid = seq.chainedSequenceId
         if tonumber(nextid) == -1 then

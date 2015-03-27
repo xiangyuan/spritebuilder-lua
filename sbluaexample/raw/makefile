@@ -8,6 +8,7 @@ ios:common
 
 common:
 	#copy the fonts
+	
 	mkdir -p $(tmpdir)/res_android/fonts
 	mkdir -p $(tmpdir)/res_ios/fonts
 	cp ./fonts/* $(tmpdir)/res_android/fonts

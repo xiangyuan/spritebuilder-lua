@@ -5,8 +5,12 @@ all:ccb android
 ccb:
 	mkdir -p res/ccb
 	cd tools && sh ccb2json.sh ../res/ccb && cd ..
-	
-android:res_android
+
+	# covert to json
+	plutil -convert json raw/example.spritebuilder/Packages/SpriteBuilder\ Resources.sbpack/Strings.ccbLang -o raw/fonts/Strings.json
+ 
+
+android:res_android ccb
 	mkdir -p res/images
 	cp tmp/res_android/ui/* res/images/
 
