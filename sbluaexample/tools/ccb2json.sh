@@ -6,6 +6,6 @@ RESULT_DIR=${PWD}/${DST_DIR}
 cd "${INPUT_DIR}"
 echo Convert:
 for i in `ls *.ccb`; do
-    echo  "    "${i} 
 	plutil -convert json ${i%.*}.ccb -o ${RESULT_DIR}/${i%.*}.json
+    echo  "    "${i}  finished!
 done

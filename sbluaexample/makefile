@@ -3,8 +3,9 @@
 all:ccb android
 
 ccb:
-	sh tools/ccb2json.sh raw/example.spritebuilder/Packages/SpriteBuilder\ Resources.sbpack res/ccb
-
+	mkdir -p res/ccb
+	cd tools && sh ccb2json.sh ../res/ccb && cd ..
+	
 android:res_android
 	mkdir -p res/images
 	cp tmp/res_android/ui/* res/images/

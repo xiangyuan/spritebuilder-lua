@@ -26,12 +26,6 @@
 				<string>你好SpriteBuilder_Lua</string>
 			</dict>
 		</dict>
-		<dict>
-			<key>key</key>
-			<string></string>
-			<key>translations</key>
-			<dict/>
-		</dict>
 	</array>
 </dict>
 </plist>

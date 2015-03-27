@@ -1,5 +1,9 @@
 local CCBLoader = class("CCBLoader")
 
+local POSITION_TYPE_IN_POINTS  = 0
+local POSITION_TYPE_IN_UI_POINTS = 1
+local POSITION_TYPE_PERCENT = 2
+
 local function setNodeProps(node, options)
     if options.contentSize then
         node:setContentSize(options.contentSize)
@@ -29,30 +33,38 @@ local function setNodeProps(node, options)
     if options.visible then
         visible = options.visible
     end
-
+    dump(options, "setNodeProps options")
+    print(debug.traceback())
     node:setScaleX(scaleX)
     node:setScaleY(scaleY)
     node:setRotation(rotation)
 
     local ignoreAnchor = options.ignoreAnchorPointForPosition or false
     node:setPosition(x, y)
+    print("anchorX, anchorY = ", anchorX, anchorY)
     node:setAnchorPoint(anchorX, anchorY)
     node:ignoreAnchorPointForPosition(ignoreAnchor)
 end
 
 local function setSpriteProps(spr, options)
     local cache = cc.SpriteFrameCache:getInstance()
-    if options.displayFrame.plist ~= "" then
-        local frame = cache:getSpriteFrame(options.displayFrame.spriteFrameName)
+    dump(options, "options")
+    if options.spriteFrame.plist ~= "" then
+        local frame = cache:getSpriteFrame(options.spriteFrame.spriteFrameName)
         spr:setSpriteFrame(frame)
     else
-        local filename = options.displayFrame.spriteFrameName
+        local filename = options.spriteFrame.spriteFrameName
         spr:setTexture(filename)
     end
-    local op = options.opacity or 255
-    spr:setOpacity(op)
-    local color = options.color or cc.c3b(255, 255, 255)
-    spr:setColor(color)
+
+    if options.opacity then
+        spr:setOpacity(options.opacity)
+    end
+
+    if options.color then
+        spr:setColor(options.color)
+    end
+    
     local flipX, flipY = false, false 
     if options.flip then
         flipX, flipY = options.flip.flipX, options.flip.flipY
@@ -91,8 +103,8 @@ end
 
 local function spriteCreateFunc(options)
     local spr = display.newSprite()
-    setNodeProps(spr, options)
     setSpriteProps(spr, options)
+    setNodeProps(spr, options)
     return spr
 end
 
@@ -143,7 +155,6 @@ end
 
 local function labelTTFCreateFunc(options)
     print("label ttf options is")
-    print_r(options)
     local label = display.newTTFLabel({ 
                                         text = options.string,
                                         font = options.fontName, 
@@ -166,7 +177,6 @@ end
 
 local function ListViewCreateFunc(options)
     print("ListViewCreateFunc")
-    print_r(options)
     local spriteFrameName = "#" .. options.spriteFrame.spriteFrameName
     local w = options.preferedSize.width
     local h = options.preferedSize.height
@@ -222,8 +232,27 @@ local baseClassCreateFuncs = {
     CCPageView = PageViewCreateFunc,
 }
 
-local function positionparseFunc(data)
-    return {x = data[1], y = data[2]}
+local function positionparseFunc(data, father)
+
+    local x, y
+
+    -- setx
+    dump(data, "positionparseFunc")
+    if father and data[4] == POSITION_TYPE_PERCENT then 
+        x = data[1] * father:getContentSize().width
+    elseif (data[4] == POSITION_TYPE_IN_POINTS or data[4] == POSITION_TYPE_IN_UI_POINTS) then
+        x = data[1]
+    end
+    print("father = ", father)
+     if father and data[5] == POSITION_TYPE_PERCENT then 
+        y = data[2] * father:getContentSize().height
+    elseif (data[5] == POSITION_TYPE_IN_POINTS or data[5] == POSITION_TYPE_IN_UI_POINTS) then
+        y = data[2]
+    end
+    print("x, y = ", x, y)
+    return {x = x, y = y}
+
+    -- sety
 end
 
 local function contentSizeParseFunc(data)
@@ -243,7 +272,11 @@ local function displayFrameParseFunc(data)
 end
 
 local function colorParseFunc(data)
-    return cc.c3b(data[1], data[2], data[3])
+    return cc.c3b(data[1]*255, data[2]*255, data[3]*255)
+end
+
+local function opacityParseFunc(data)
+    return data*255
 end
 
 local function flipParseFunc(data)
@@ -292,11 +325,11 @@ local propParseFuncs = {
     ignoreAnchorPointForPosition = "self",  -- “self” 相当于 local function parseFunc(data) return data end
     displayFrame = displayFrameParseFunc,
     color = colorParseFunc,
+    opacity = opacityParseFunc,
     flip = flipParseFunc,
     blendFunc = BlendFuncParseFunc,
     spriteFrame = spriteFrameParseFunc,
     preferedSize = preferedSizeParseFunc,
-    opacity = "self",
     insetLeft = "self",
     insetTop = "self",
     insetRight = "self",
@@ -335,7 +368,7 @@ propParseFuncs["backgroundSpriteFrame|3"] = spriteFrameParseFunc
 propParseFuncs["titleColor|3"] = colorParseFunc
 
 
-local function parseProps(props)
+local function parseProps(props, father)
     local ret = {}
     for i = 1, #props do
         local p = props[i]
@@ -348,7 +381,7 @@ local function parseProps(props)
             v = p["value"]
         end
         if func and type(func) == 'function' then
-            ret[name] = func(v)
+            ret[name] = func(v, father)
         elseif func and type(func) == "string" and func == "self" then
             ret[name] = v
         end
@@ -358,7 +391,7 @@ end
 
 local function parseSequenceProps(seqs, callbacks)
     local ret = {}
-    local CCSeq = require("app.statics.CCBLoader.CCBSeq")
+    local CCSeq = require("spritebuilder-lua.CCBSeq")
     for i = 1, #seqs do
         local s = CCSeq.new(seqs[i], callbacks)
         ret[s.name] = s
@@ -380,12 +413,14 @@ local function setNodeBaseValue(node, baseClassName, options)
     node.baseValue = options
 end
 
-local function createNodeWithBaseClassName(rootdata, childrenList, seq)
+local function createNodeWithBaseClassName(rootdata, father, childrenList, seq)
     local baseClassName = rootdata["baseClass"]
+    print("baseClassName = ", baseClassName)
     local props = rootdata["properties"]
     local sequenses = rootdata["sequences"]
-    local options = parseProps(props)
+    local options = parseProps(props, father)
     local node = baseClassCreateFuncs[baseClassName](options)
+    dump(options)
     setNodeBaseValue(node, baseClassName, options)
     -- 把animatedProprties存起来，方便后面创建Action的时候使用
     local animatedProperties = rootdata["animatedProperties"]
@@ -411,7 +446,8 @@ local function createNodeWithBaseClassName(rootdata, childrenList, seq)
             end
 
             -- 递归创建子节点
-            local c = createNodeWithBaseClassName(child, nextList, seq)
+            print("node.contentsize = ", node:getContentSize().width, node:getContentSize().height)
+            local c = createNodeWithBaseClassName(child, node, nextList, seq)
             if c then
                 node:addChild(c)
             else
@@ -439,7 +475,7 @@ function CCBLoader.loadCCB(jsonFileName, callbacks, root)
     local seqdata = layoutdata["sequences"]
     local childrenList = {}
     local seq = parseSequenceProps(seqdata, callbacks)
-    local ccbNode = createNodeWithBaseClassName(rootdata, childrenList, seq)
+    local ccbNode = createNodeWithBaseClassName(rootdata, root, childrenList, seq)
     if root then
         root:addChild(ccbNode)
     end
