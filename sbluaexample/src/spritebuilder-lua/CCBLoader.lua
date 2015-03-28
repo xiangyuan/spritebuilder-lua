@@ -6,6 +6,14 @@ local POSITION_TYPE_PERCENT = 2
 local Config = require("spritebuilder-lua.CCBConfig")
 local translation = Config:getInstance():getTranslation()
 
+local c3b_c4b = require("spritebuilder-lua.CCBTools").c3b_c4b
+
+local function stringFromOptions(options)
+    local data = options.string or options.title
+    assert(data ~= nil, "Error: stringFromOptions data is nil")
+    return data[2] and translation:str(data[1]) or data[1]
+end
+
 local function setNodeProps(node, options)
     if options.contentSize then
         node:setContentSize(options.contentSize)
@@ -35,14 +43,12 @@ local function setNodeProps(node, options)
     if options.visible then
         visible = options.visible
     end
-    print(debug.traceback())
     node:setScaleX(scaleX)
     node:setScaleY(scaleY)
     node:setRotation(rotation)
 
     local ignoreAnchor = options.ignoreAnchorPointForPosition or false
     node:setPosition(x, y)
-    print("anchorX, anchorY = ", anchorX, anchorY)
     node:setAnchorPoint(anchorX, anchorY)
     node:ignoreAnchorPointForPosition(ignoreAnchor)
 end
@@ -77,7 +83,7 @@ local function setScale9SpriteProps(spr, options)
     local cache = cc.SpriteFrameCache:getInstance()
     local frame = cache:getSpriteFrame(options.spriteFrame.spriteFrameName)
     spr:setSpriteFrame(frame)
-    spr:setPreferredSize(options.preferedSize)
+    spr:setPreferredSize(options.preferredSize)
     spr:setOpacity(options.opacity)
     spr:setColor(options.color)
 end
@@ -116,59 +122,84 @@ local function scale9SpriteCreateFunc(options)
 end
 
 local function controllButtonCreateFunc(options)
-    local title = display.newTTFLabel({ text =options["title|1"], 
-                                        font = options["titleTTF|1"], 
-                                        size = options["titleTTFSize|1"] }) 
+    dump(options, "control btn's options")
+    local text = stringFromOptions(options)
+    local fontPath = Config.fonts_root_path .. options.fontName
+
+    local title = display.newTTFLabel({ text = text, 
+                                        font = fontPath, 
+                                        size = options.fontSize }) 
     local titleAnchorX, titleAnchorY = 0.5, 0.5
     if options.labelAnchorPoint then
         titleAnchorX, titleAnchorY = options.labelAnchorPoint.x, options.labelAnchorPoint.y
     end
     title:setAnchorPoint(cc.p(titleAnchorX, titleAnchorY))
 
-    local norfile = options["backgroundSpriteFrame|1"].spriteFrameName
-    local highfile = options["backgroundSpriteFrame|2"].spriteFrameName
-    local disfile = options["backgroundSpriteFrame|3"].spriteFrameName
+    local norFile = options["backgroundSpriteFrame|Normal"].spriteFrameName
+    local highFile = options["backgroundSpriteFrame|Highlighted"].spriteFrameName
+    local disFile = options["backgroundSpriteFrame|Disabled"].spriteFrameName
+    local selFile = options["backgroundSpriteFrame|Selected"].spriteFrameName
+    local zoomWhenHighlighted = options.zoomWhenHighlighted
+    local btnsize = options.preferredSize
 
-    local zoomOnTouchDown = options.zoomOnTouchDown
-    local btnsize = options.preferedSize
-
-    local norSprite = display.newScale9Sprite("#"..norfile)
+    local norSprite = display.newScale9Sprite("#"..norFile)
+    norSprite:setPreferredSize(btnsize)
     local ret =  cc.ControlButton:create(title, norSprite)
-    ret:setZoomOnTouchDown(zoomOnTouchDown)
+    ret:setZoomOnTouchDown(zoomWhenHighlighted)
     -- 文件名中包含nil.png表示不创建这个图片，节约资源和内存
-    if not string.find(highfile, "nil.png") then
-        local highSprite = display.newScale9Sprite("#"..highfile)
+    if highFile and string.len(highFile) > 0 then
+        local highSprite = display.newScale9Sprite("#"..highFile)
+        highSprite:setPreferredSize(btnsize)
         ret:setBackgroundSpriteForState(highSprite, 
                                         cc.CONTROL_STATE_HIGH_LIGHTED);
     end
-    if not string.find(disfile, "nil.png") then
-        local disSprite = display.newScale9Sprite("#"..disfile)  
+    if disFile and string.len(disFile) > 0 then
+        local disSprite = display.newScale9Sprite("#"..disFile)  
+        disSprite:setPreferredSize(btnsize)
         ret:setBackgroundSpriteForState(disSprite, 
                                         cc.CONTROL_STATE_DISABLED);
     end
-    ret:setPreferredSize(btnsize)
 
+    local status = {"Normal", "Highlighted", "Disabled", "Selected"}
+    local states = {}
+    for i = 1, #status do 
+        local key =  "labelColor|" .. status[i]
+        local labelColor = options[key]
+        if labelColor then
+            ret:setTitleColorForState(labelColor, cc.CONTROL_STATE_NORMAL+(i-1))
+        end
+    end
+    
+    
+
+    ret:setPreferredSize(btnsize)
     setNodeProps(ret, options)
 
     return ret
 end
 
 local function labelTTFCreateFunc(options)
+    dump(options, "labelTTFCreateFunc")
     local label = display.newTTFLabel({ 
-                                        text = options.string,
+                                        text = stringFromOptions(options),
                                         font = options.fontName, 
                                         size = options.fontSize,
-                                        color = options.color,
+                                        color = c3b_c4b(options.fontColor),
                                         dimensions = options.dimensions,
                                         align = options.horizontalAlignment,
                                         valign = options.verticalAlignment
                                         })
+    local outlineColor = c3b_c4b(options.outlineColor)
+    label:enableOutline(outlineColor, options.outlineWidth)
+
+    label:enableShadow(c3b_c4b(options.shadowColor), options.shadowOffset, options.shadowBlurRadius)
+
     setNodeProps(label, options)
     return label
 end
 
 local function labelBMFontCreateFunc(options)
-    local text = options.string[2] and translation:str(options.string[1]) or options.string[1]
+    local text = stringFromOptions(options)--options.string[2] and translation:str(options.string[1]) or options.string[1]
     local font_path = Config.fonts_root_path .. options.fntFile
     local label = display.newBMFontLabel{font = font_path, text = text}
     setNodeProps(label, options)
@@ -179,8 +210,8 @@ end
 local function ListViewCreateFunc(options)
     print("ListViewCreateFunc")
     local spriteFrameName = "#" .. options.spriteFrame.spriteFrameName
-    local w = options.preferedSize.width
-    local h = options.preferedSize.height
+    local w = options.preferredSize.width
+    local h = options.preferredSize.height
     local x = options.position.x
     local y = options.position.y
     local ax = options.anchorPoint.x
@@ -199,8 +230,8 @@ local function ListViewCreateFunc(options)
 end
 
 local function PageViewCreateFunc(options)
-    local w = options.preferedSize.width
-    local h = options.preferedSize.height
+    local w = options.preferredSize.width
+    local h = options.preferredSize.height
     local x = options.position.x
     local y = options.position.y
     local pageView = cc.ui.UIPageView.new {
@@ -221,16 +252,25 @@ local function PageViewCreateFunc(options)
     return pageView
 end
 
+local function nodeColorCreateFunc(options)
+    local color = options.color
+    local layer = cc.LayerColor:create(cc.c3b(color.r, color.g, color.b, 1))
+    layer:setOpacity(options.opacity)
+    setNodeProps(layer, options)
+    return layer
+end
+
 local baseClassCreateFuncs = {
     CCLayer = layerCreateFunc,
     CCNode = nodeCreateFunc,
     CCSprite = spriteCreateFunc,
     CCScale9Sprite = scale9SpriteCreateFunc,
-    CCControlButton = controllButtonCreateFunc,
+    CCButton = controllButtonCreateFunc,
     CCLabelTTF = labelTTFCreateFunc,
     CCLabelBMFont  = labelBMFontCreateFunc,
     CCListView = ListViewCreateFunc,
     CCPageView = PageViewCreateFunc,
+    CCNodeColor = nodeColorCreateFunc,
 }
 
 local function positionparseFunc(data, father)
@@ -288,16 +328,12 @@ local function spriteFrameParseFunc(data)
     return {plist = data[1], spriteFrameName = data[2]}
 end
 
-local function preferedSizeParseFunc(data)
+local function preferredSizeParseFunc(data)
     return {width = data[1], height = data[2]}
 end
 
 local function ccControlParseFunc(data)
     return {callback_func_name = data[1] }
-end
-
-local function ccControlTTFSizeParseFunc(data)
-    return data[1]
 end
 
 local function labelAnchorPointParseFunc(data)
@@ -310,6 +346,18 @@ end
 
 local function demensionsParseFunc(data)
     return {width = data[1], height = data[2]}
+end
+
+local function horizontalPaddingFunc(data)
+    return data[1]
+end
+
+local function verticalPaddingFunc(data)
+    return data[1]
+end
+
+local function floatScaleParseFunc(data)
+    return data[1]
 end
 
 local propParseFuncs = {
@@ -326,7 +374,7 @@ local propParseFuncs = {
     flip = flipParseFunc,
     blendFunc = BlendFuncParseFunc,
     spriteFrame = spriteFrameParseFunc,
-    preferedSize = preferedSizeParseFunc,
+    preferredSize = preferredSizeParseFunc,
     insetLeft = "self",
     insetTop = "self",
     insetRight = "self",
@@ -336,7 +384,7 @@ local propParseFuncs = {
     ccControl = ccControlParseFunc,
     enabled = "self",
     labelAnchorPoint = labelAnchorPointParseFunc,
-    zoomOnTouchDown = "self",
+    zoomWhenHighlighted = "self",
     isHorizontal = "self",
     column = "self",
     row = "self",
@@ -352,17 +400,38 @@ local propParseFuncs = {
     horizontalAlignment = "self",
     verticalAlignment = "self",
     dimensions = demensionsParseFunc,
+    horizontalPadding = horizontalPaddingFunc,
+    verticalPadding = verticalPaddingFunc,
+    title = "self",
+    fontColor = colorParseFunc,
+    outlineColor = colorParseFunc,
+    outlineWidth = floatScaleParseFunc,
+    shadowColor = colorParseFunc,
+    shadowBlurRadius = floatScaleParseFunc,
+    shadowOffset = positionparseFunc,
 }
--- cocosbuilder有的key也太奇葩了。 为了这个 | 只好这么写了
-propParseFuncs["title|1"] = "self"
-propParseFuncs["titleTTF|1"] = "self"
-propParseFuncs["titleTTFSize|1"] = ccControlTTFSizeParseFunc
-propParseFuncs["backgroundSpriteFrame|1"] = spriteFrameParseFunc
-propParseFuncs["titleColor|1"] = colorParseFunc
-propParseFuncs["backgroundSpriteFrame|2"] = spriteFrameParseFunc
-propParseFuncs["titleColor|2"] = colorParseFunc
-propParseFuncs["backgroundSpriteFrame|3"] = spriteFrameParseFunc
-propParseFuncs["titleColor|3"] = colorParseFunc
+
+propParseFuncs["backgroundSpriteFrame|Normal"] = spriteFrameParseFunc
+propParseFuncs["backgroundSpriteFrame|Highlighted"] = spriteFrameParseFunc
+propParseFuncs["backgroundSpriteFrame|Disabled"] = spriteFrameParseFunc
+propParseFuncs["backgroundSpriteFrame|Selected"] = spriteFrameParseFunc
+
+propParseFuncs["labelColor|Normal"] = colorParseFunc
+propParseFuncs["labelColor|Highlighted"] = colorParseFunc
+propParseFuncs["labelColor|Disabled"] = colorParseFunc
+propParseFuncs["labelColor|Selected"] = colorParseFunc
+
+propParseFuncs["labelOpacity|Normal"] = "self"
+propParseFuncs["labelOpacity|Highlighted"] = "self"
+propParseFuncs["labelOpacity|Disabled"] = "self"
+propParseFuncs["labelOpacity|Selected"] = "self"
+
+
+propParseFuncs["backgroundColor|Normal"] = colorParseFunc
+propParseFuncs["backgroundColor|Highlighted"] = colorParseFunc
+propParseFuncs["backgroundColor|Disabled"] = colorParseFunc
+propParseFuncs["backgroundColor|Selected"] = colorParseFunc
+
 
 
 local function parseProps(props, father)
@@ -417,7 +486,6 @@ local function createNodeWithBaseClassName(rootdata, father, childrenList, seq)
     local sequenses = rootdata["sequences"]
     local options = parseProps(props, father)
     local node = baseClassCreateFuncs[baseClassName](options)
-    dump(options)
     setNodeBaseValue(node, baseClassName, options)
     -- used for create actions
     local animatedProperties = rootdata["animatedProperties"]
@@ -445,7 +513,6 @@ local function createNodeWithBaseClassName(rootdata, father, childrenList, seq)
 
             -- 递归创建子节点
             -- create the children recursively
-            print("node.contentsize = ", node:getContentSize().width, node:getContentSize().height)
             local c = createNodeWithBaseClassName(child, node, nextList, seq)
             if c then
                 node:addChild(c)

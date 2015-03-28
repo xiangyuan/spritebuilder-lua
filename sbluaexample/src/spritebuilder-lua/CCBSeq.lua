@@ -19,7 +19,7 @@ local CCBSeq = class("CCBSeq")
 
 function CCBSeq:ctor(jsondata, callbacks)
     self.callbacks = callbacks
-    self.animatedNodes = {}   
+    self.animatedNodes = {} 
     require("spritebuilder-lua.CCBTools").deepcopy(self, jsondata)
     dump(self)
 end

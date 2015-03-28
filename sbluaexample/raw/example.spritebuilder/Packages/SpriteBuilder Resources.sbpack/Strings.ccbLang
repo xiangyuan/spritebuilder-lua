@@ -15,7 +15,7 @@
 	<array>
 		<dict>
 			<key>comment</key>
-			<string>Hello SpriteBuilder-Lua</string>
+			<string></string>
 			<key>key</key>
 			<string>game_title</string>
 			<key>translations</key>
@@ -24,6 +24,28 @@
 				<string>Hello SpriteBuilder-Lua</string>
 				<key>zh-Hans</key>
 				<string>你好SpriteBuilder_Lua</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>key</key>
+			<string>button_test</string>
+			<key>translations</key>
+			<dict>
+				<key>en</key>
+				<string>Button Test</string>
+				<key>zh-Hans</key>
+				<string>测试按钮</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>key</key>
+			<string>ttf_title</string>
+			<key>translations</key>
+			<dict>
+				<key>en</key>
+				<string>This is Lua implemention!Try this!</string>
+				<key>zh-Hans</key>
+				<string>Lua实现！</string>
 			</dict>
 		</dict>
 	</array>

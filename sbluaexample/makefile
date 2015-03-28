@@ -1,14 +1,14 @@
-.PHONY: all ccb res_ios res_android android ios clean
+.PHONY: all ccb fonts res_ios res_android android ios clean
 
 all:ccb android
 
-ccb:
+ccb: fonts
 	mkdir -p res/ccb
 	cd tools && sh ccb2json.sh ../res/ccb && cd ..
 
+fonts:
 	# covert to json
 	plutil -convert json raw/example.spritebuilder/Packages/SpriteBuilder\ Resources.sbpack/Strings.ccbLang -o raw/fonts/Strings.json
- 
 
 android:res_android ccb
 	mkdir -p res/images

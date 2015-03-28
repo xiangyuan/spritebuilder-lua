@@ -17,10 +17,6 @@ function CCBString:ctor(path, language)
         deepcopy(translation, t.translations)
         self.translations[t.key] = translation
     end
-    dump(self.translations, "self.translations")
-    -- dump(self, "CCBString", 5)
-    print("str(game_title) ", self:str("game_title"))
-
 end
 
 
