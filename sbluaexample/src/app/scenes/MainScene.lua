@@ -11,6 +11,7 @@ function MainScene:ctor()
     local loader = require("spritebuilder-lua.CCBLoader")
     local node, children, seq = loader.loadCCB("ccb/main_layer.json")
     self:addChild(node)
+    loader.playTimeline(node, seq)
 
     -- local layer = cc.LayerColor:create(cc.c4b(255, 0, 0,255), 720, 1280)
     -- layer:setPosition(0, 0)

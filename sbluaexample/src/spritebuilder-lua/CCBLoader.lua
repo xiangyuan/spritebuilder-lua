@@ -6,7 +6,9 @@ local POSITION_TYPE_PERCENT = 2
 local Config = require("spritebuilder-lua.CCBConfig")
 local translation = Config:getInstance():getTranslation()
 
-local c3b_c4b = require("spritebuilder-lua.CCBTools").c3b_c4b
+local Tools = require("spritebuilder-lua.CCBTools")
+local c3b_c4b = Tools.c3b_c4b
+local delayCall = Tools.delayCall
 
 local function stringFromOptions(options)
     local data = options.string or options.title
@@ -567,15 +569,16 @@ function CCBLoader.playSeq(node, allseq, s)
             return
         end
         local nextSeq = getSeqWithId(allseq, nextid)
-        playSeq(runningNode, allseq, nextSeq)
+        CCBLoader.playSeq(runningNode, allseq, nextSeq)
     end
-    local next = delaycall(s.length, playNextSeq, node, allseq, s) 
+    local next = delayCall(s.length, playNextSeq, node, allseq, s) 
     node:runAction(next)
 
 end
 
 function CCBLoader.playTimeline(node, allseq, name)
-    playSeq(node, allseq, allseq[name])
+    local nm = name or "Default Timeline"
+    CCBLoader.playSeq(node, allseq, allseq[nm])
 end
 
 return CCBLoader
