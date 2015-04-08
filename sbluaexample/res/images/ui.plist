@@ -69,6 +69,32 @@
                 <key>sourceSize</key>
                 <string>{195,63}</string>
             </dict>
+            <key>ui_energy_bar.png</key>
+            <dict>
+                <key>frame</key>
+                <string>{{0,216},{172,11}}</string>
+                <key>offset</key>
+                <string>{0,0}</string>
+                <key>rotated</key>
+                <false/>
+                <key>sourceColorRect</key>
+                <string>{{0,0},{172,11}}</string>
+                <key>sourceSize</key>
+                <string>{172,11}</string>
+            </dict>
+            <key>ui_hp_bar.png</key>
+            <dict>
+                <key>frame</key>
+                <string>{{0,198},{175,16}}</string>
+                <key>offset</key>
+                <string>{0,0}</string>
+                <key>rotated</key>
+                <false/>
+                <key>sourceColorRect</key>
+                <string>{{0,0},{175,16}}</string>
+                <key>sourceSize</key>
+                <string>{175,16}</string>
+            </dict>
         </dict>
         <key>metadata</key>
         <dict>
@@ -79,7 +105,7 @@
             <key>size</key>
             <string>{327,230}</string>
             <key>smartupdate</key>
-            <string>$TexturePacker:SmartUpdate:29b8ce67cb3bb3002d8860a8f380d36b:1/1$</string>
+            <string>$TexturePacker:SmartUpdate:8a95889217d1c45739074e6a1707b640:1/1$</string>
             <key>textureFileName</key>
             <string>ui.png</string>
         </dict>

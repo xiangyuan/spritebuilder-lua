@@ -6,12 +6,12 @@ end)
 function MainScene:ctor()
 
     local cache = cc.SpriteFrameCache:getInstance()
-    cache:addSpriteFrames("images/ui.plist")
+    cache:addSpriteFrames("images/ui.plist", "images/ui.png")
 
     local loader = require("spritebuilder-lua.CCBLoader")
     local node, children, seq = loader.loadCCB("ccb/main_layer.json")
     self:addChild(node)
-    loader.playTimeline(node, seq)
+    -- loader.playTimeline(node, seq)
 
     -- local layer = cc.LayerColor:create(cc.c4b(255, 0, 0,255), 720, 1280)
     -- layer:setPosition(0, 0)
